@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import {useCartStore} from "~/store/useCart";
+
 const breakpoints = ref({
   1: {
     slidesPerView: 4.15,
@@ -14,7 +16,10 @@ defineProps({
     type: Array,
   }
 })
-
+const store = useCartStore()
+const loadPhoto = (photo) => {
+  store.initCart(photo)
+}
 const containerRef = ref(null)
 const swiper = useSwiper(containerRef, {
   breakpoints: breakpoints.value,
@@ -32,9 +37,10 @@ const swiper = useSwiper(containerRef, {
               v-for="(slide, idx) in slides"
               :key="idx"
           >
-            <a class="relative" :href="slide.icon" data-fancybox="gallery">
+            <button class="relative">
               <img class="h-32 object-cover rounded-xl" :src="slide.icon" alt="slide.icon">
-            </a>
+              <UButton  @click.prevent="loadPhoto(slide.icon)">выбрать</UButton>
+            </button>
           </swiper-slide>
         </swiper-container>
       </ClientOnly>
