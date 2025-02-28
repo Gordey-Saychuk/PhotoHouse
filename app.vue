@@ -1,0 +1,4 @@
+<template>
+    <TheHeader/>
+    <NuxtLayout />
+</template>
