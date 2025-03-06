@@ -2,6 +2,9 @@
 export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
   devtools: { enabled: true },
+  app: {
+    pageTransition: { name: 'page', mode: 'out-in' }
+  },
   modules: [
     '@nuxt/ui',
     '@nuxtjs/sitemap',
@@ -20,6 +23,11 @@ export default defineNuxtConfig({
           silenceDeprecations: ["import"]
         }
       }
+    }
+  },
+  runtimeConfig: {
+    public: {
+      TOKEN: process.env.TOKEN,
     }
   },
 })

@@ -21,7 +21,7 @@ const route = useRoute()
       <p class="text-center text-zinc-500">Фотобудка</p>
       <ClientOnly>
         <UButton
-            class="absolute right-0 top-0"
+            class="absolute right-1 top-1"
             :icon="isDark ? 'i-heroicons-moon-20-solid' : 'i-heroicons-sun-20-solid'"
             color="gray"
             variant="ghost"

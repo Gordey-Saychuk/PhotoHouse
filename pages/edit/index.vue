@@ -1,88 +1,196 @@
 <script setup lang="ts">
 import {useCartStore} from "~/store/useCart";
+import {onMounted, ref} from "vue";
 const store = useCartStore();
-const activeTab = ref(5)
-const value = ref(5)
-const checkPhoto = ref(false)
-const isOpen = ref(false)
-const isOpenPen = ref(false)
+
+
+
+
+const activeTab = ref<number>(5)
+const checkPhoto = ref<boolean>(false)
+const isOpen = ref<boolean>(false)
+
 const tabs = ref([
-  {icon: 'i-heroicons-paint-brush-16-solid', color: 'dark:text-white', custom: false},
-  {icon: 'i-solar-eraser-bold', color: 'dark:text-white', custom: false},
-  {icon: 'i-ic-twotone-circle', color: 'dark:text-pink-500', custom: true},
-  {icon: 'i-ion-trash-sharp', color: 'dark:text-white', custom: false},
+  {id: 1, icon: 'i-heroicons-paint-brush-16-solid', color: 'dark:text-white', custom: false},
+  {id: 2, icon: 'i-solar-eraser-bold', color: 'dark:text-white', custom: false},
+  {id: 3, icon: 'i-ic-twotone-circle', color: 'dark:text-pink-500', custom: true},
+  {id: 4, icon: 'i-ion-trash-sharp', color: 'dark:text-white', custom: false},
 ])
+
+const colors = ref([
+  {id: 1, color: 'dark:bg-pink-500 bg-pink-500'},
+  {id: 2, color: 'dark:bg-green-500 bg-green-500'},
+  {id: 3, color: 'dark:bg-white bg-white'},
+  {id: 4,  color: 'dark:bg-black bg-black'},
+])
+
+
+
+
+
+
+
+
+
+
+
+
+
+const isOpenCloth = ref<boolean>(false)
+const visibleHand = ref<boolean>(true)
+const canvas = ref(null);
+const ctx = ref(null);
+const isDrawing = ref(false);
+const tool = ref('pencil');
+const imgToCanvas = ref(null);
+const photo = ref('');
+const canvasWidth = ref(300); // Ширина канваса
+const canvasHeight = ref(500); // Высота канваса
+
+
+
+const color = ref<string>('rgba(236, 72, 153, 1)')
+
+const imageSrc = ref(store.cartBottom);
+onMounted(() => {
+  // canvasWidth.value = imgToCanvas.value.width
+  // canvasHeight.value = imgToCanvas.value.height
+  ctx.value = canvas.value.getContext('2d');
+  ctx.value.lineWidth = 25;
+  ctx.value.lineCap = 'round';
+});
+
+const startDrawing = (event) => {
+  visibleHand.value = false;
+  isDrawing.value = true;
+  ctx.value.beginPath();
+  const { offsetX, offsetY } = getMousePosition(event);
+  ctx.value.moveTo(offsetX, offsetY);
+};
+
+const stopDrawing = () => {
+  isDrawing.value = false;
+  ctx.value.closePath();
+  photo.value = canvas.value.toDataURL();
+};
+
+const draw = (event) => {
+  if (!isDrawing.value) return;
+  const { offsetX, offsetY } = getMousePosition(event);
+  if (tool.value === 'pencil') {
+    ctx.value.lineTo(offsetX, offsetY);
+    ctx.value.strokeStyle = color.value;
+    ctx.value.stroke();
+  } else if (tool.value === 'eraser') {
+    ctx.value.clearRect(offsetX - 10, offsetY - 10, 20, 20); // Стираем область
+  }
+};
+
+const getMousePosition = (event) => {
+  const rect = canvas.value.getBoundingClientRect();
+  const x = event.touches ? event.touches[0].clientX - rect.left : event.clientX - rect.left;
+  const y = event.touches ? event.touches[0].clientY - rect.top : event.clientY - rect.top;
+  return { offsetX: x, offsetY: y };
+};
+
+const setTool = (selectedTool) => {
+  tool.value = selectedTool;
+};
+
+const updateSettingsForPencil = (weight:number, size:number, opacity:number) => {
+  setTool('pencil')
+  ctx.value.lineWidth = size * 5;
+  color.value = `rgba(236, 72, 153, ${opacity / 10})`;
+
+}
+
+const deleteMask = () => {
+  ctx.value.clearRect(0, 0, canvasWidth.value, canvasHeight.value);
+  activeTab.value = 5;
+  photo.value = '';
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 watch(()=> activeTab.value, () => {
   activeTab.value === 3 ? isOpen.value = true : false
-  activeTab.value === 0 ? isOpenPen.value = true : false
+  activeTab.value === 2 ? setTool('eraser'): false
 })
 </script>
 
 <template>
 <main>
   <section>
-    <UModal :ui="{container: 'items-center', background: 'dark:bg-black/55', shadow: 'shadow-none'}" v-model="isOpen">
-      <div class="p-4">
-        <h5 class="font-semibold text-lg text-center">Вы уверены?</h5>
-        <p class="text-center mb-3">Если удалите маску, то придется рисовать заново</p>
-        <UButton class="dark:bg-red-500 bg-red-500 dark:text-white mb-2">Удалить</UButton>
-        <UButton @click="isOpen = false" :ui="{variant: {solid: 'dark:bg-blue-500 dark:text-white'}}">Отмена</UButton>
-      </div>
-    </UModal>
-    <UModal :ui="{overlay:{background: 'bg-transparent dark:bg-transparent'}, container: 'items-start mt-24', background: 'dark:bg-black/60 backdrop-blur-md', shadow: 'shadow-none'}" v-model="isOpenPen">
-      <div class="p-4 flex flex-col gap-3">
-        <div class="w-10 h-10 mx-auto border-spacing-4 border-dotted dark:border-white rounded-full bg-pink-500"></div>
-        <p>Толщина</p>
-        <URange :ui="{progress: {background: 'dark:bg-blue-500', base: 'relative text-white dark:text-white'}}" v-model="value" />
-        <p>Размер</p>
-        <URange v-model="value" />
-        <p>Непрозрачность</p>
-        <URange v-model="value" />
-        <UButton @click="isOpenPen = false" >Применить</UButton>
-      </div>
-    </UModal>
     <UContainer class="relative">
-      <div :class="{'opacity-100 z-20': checkPhoto}" class="w-3/4 absolute bottom-0 left-3 transition-opacity duration-700 opacity-0 -z-10">
+      <div :class="{'opacity-100 z-20': checkPhoto}" class="w-3/4 absolute bottom-0 left-3 transition-opacity duration-300 opacity-0">
         <UButton @click.prevent="checkPhoto = !checkPhoto" :ui="{variant: {solid: 'ring-0 dark:bg-white/40 dark:text-zinc-700 p-0 w-fit rounded-md'}}" class="absolute top-3 rotate-180 right-3 z-10"  icon="i-material-symbols-arrow-outward"></UButton>
-        <img class="object-cover rounded-lg shadow-[0_-5px_150px_100px_rgba(0,0,0,0.2)]" :src="store.cart" alt="image">
+        <img class="object-cover dark:bg-white rounded-lg shadow-[0_-5px_150px_100px_rgba(0,0,0,0.2)]" :src="store.cart ? store.cart : ''" alt="image">
       </div>
-      <img class="mb-5 " :src="store.cartBottom" alt="image">
-      <div :class="{'opacity-100': activeTab === 5}" class="opacity-0 transition-opacity duration-300">
-        <div class="absolute left-1/2 -translate-x-1/2 top-1/3 p-3 rounded-lg w-56 text-center dark:bg-black/55">Закрасьте область на фото, на которой должен появиться новый наряд</div>
-        <svg class="absolute top-2/4  left-1/2 -translate-x-1/2" width="75" height="107" viewBox="0 0 75 107" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="32" cy="21.2056" r="20" stroke="black"/>
-          <circle cx="32" cy="21.2056" r="20" fill="#FF00B2" stroke="white" stroke-dasharray="1 2"/>
-          <mask id="path-3-outside-1_6705_12705" maskUnits="userSpaceOnUse" x="0.408203" y="19.2056" width="74" height="87" fill="black">
-            <rect fill="white" x="0.408203" y="19.2056" width="74" height="87"/>
-            <path d="M38.1902 49.4687C38.1902 46.3465 40.7207 43.816 43.8429 43.816C46.965 43.816 49.4955 46.3465 49.4955 49.4687V53.2371C49.4955 50.1149 52.026 47.5845 55.1481 47.5845C58.2702 47.5845 60.8007 50.1149 60.8007 53.2371V58.8897V56.8886C60.8007 53.7665 63.3312 51.236 66.4533 51.236C69.5755 51.236 72.106 53.7665 72.106 56.8886V75.8476C72.106 91.4563 59.4516 104.111 43.8429 104.111C36.0385 104.111 28.9727 100.947 23.8571 95.8333L3.63017 70.3626C1.84959 68.1204 2.03422 64.9003 4.05786 62.8748C6.25862 60.674 9.82543 60.674 12.0262 62.8748L19.9869 70.8356C22.5325 73.3811 26.8832 71.5779 26.8832 67.9791V58.8897V26.8582C26.8832 23.7361 29.4137 21.2056 32.5358 21.2056C35.6579 21.2056 38.1884 23.7361 38.1884 26.8582V53.2371"/>
-          </mask>
-          <path d="M38.1902 49.4687C38.1902 46.3465 40.7207 43.816 43.8429 43.816C46.965 43.816 49.4955 46.3465 49.4955 49.4687V53.2371C49.4955 50.1149 52.026 47.5845 55.1481 47.5845C58.2702 47.5845 60.8007 50.1149 60.8007 53.2371V58.8897V56.8886C60.8007 53.7665 63.3312 51.236 66.4533 51.236C69.5755 51.236 72.106 53.7665 72.106 56.8886V75.8476C72.106 91.4563 59.4516 104.111 43.8429 104.111C36.0385 104.111 28.9727 100.947 23.8571 95.8333L3.63017 70.3626C1.84959 68.1204 2.03422 64.9003 4.05786 62.8748C6.25862 60.674 9.82543 60.674 12.0262 62.8748L19.9869 70.8356C22.5325 73.3811 26.8832 71.5779 26.8832 67.9791V58.8897V26.8582C26.8832 23.7361 29.4137 21.2056 32.5358 21.2056C35.6579 21.2056 38.1884 23.7361 38.1884 26.8582V53.2371" fill="black" fill-opacity="0.3"/>
-          <path d="M36.1902 49.4687C36.1902 50.5732 37.0857 51.4687 38.1902 51.4687C39.2948 51.4687 40.1902 50.5732 40.1902 49.4687H36.1902ZM47.4955 53.2371C47.4955 54.3416 48.3909 55.2371 49.4955 55.2371C50.6001 55.2371 51.4955 54.3416 51.4955 53.2371H47.4955ZM58.8007 58.8897C58.8007 59.9943 59.6961 60.8897 60.8007 60.8897C61.9053 60.8897 62.8007 59.9943 62.8007 58.8897H58.8007ZM23.8571 95.8333L22.2909 97.0771C22.3383 97.1368 22.3892 97.1938 22.4431 97.2478L23.8571 95.8333ZM3.63017 70.3626L2.06395 71.6064L2.06395 71.6064L3.63017 70.3626ZM4.05786 62.8748L2.64365 61.4606L2.64299 61.4612L4.05786 62.8748ZM12.0262 62.8748L13.4404 61.4606L13.4404 61.4606L12.0262 62.8748ZM19.9869 70.8356L18.5727 72.2498L18.5727 72.2498L19.9869 70.8356ZM36.1884 53.2371C36.1884 54.3416 37.0838 55.2371 38.1884 55.2371C39.293 55.2371 40.1884 54.3416 40.1884 53.2371H36.1884ZM40.1902 49.4687C40.1902 47.4511 41.8253 45.816 43.8429 45.816V41.816C39.6162 41.816 36.1902 45.242 36.1902 49.4687H40.1902ZM43.8429 45.816C45.8604 45.816 47.4955 47.4511 47.4955 49.4687H51.4955C51.4955 45.242 48.0696 41.816 43.8429 41.816V45.816ZM47.4955 49.4687V53.2371H51.4955V49.4687H47.4955ZM51.4955 53.2371C51.4955 51.2195 53.1305 49.5845 55.1481 49.5845V45.5845C50.9214 45.5845 47.4955 49.0104 47.4955 53.2371H51.4955ZM55.1481 49.5845C57.1657 49.5845 58.8007 51.2195 58.8007 53.2371H62.8007C62.8007 49.0104 59.3748 45.5845 55.1481 45.5845V49.5845ZM58.8007 53.2371V58.8897H62.8007V53.2371H58.8007ZM62.8007 58.8897V56.8886H58.8007V58.8897H62.8007ZM62.8007 56.8886C62.8007 54.8711 64.4358 53.236 66.4533 53.236V49.236C62.2266 49.236 58.8007 52.6619 58.8007 56.8886H62.8007ZM66.4533 53.236C68.4709 53.236 70.106 54.8711 70.106 56.8886H74.106C74.106 52.6619 70.68 49.236 66.4533 49.236V53.236ZM70.106 56.8886V75.8476H74.106V56.8886H70.106ZM70.106 75.8476C70.106 90.3518 58.3471 102.111 43.8429 102.111V106.111C60.5562 106.111 74.106 92.5609 74.106 75.8476H70.106ZM43.8429 102.111C36.5903 102.111 30.0271 99.1731 25.271 94.4188L22.4431 97.2478C27.9183 102.721 35.4867 106.111 43.8429 106.111V102.111ZM25.4233 94.5895L5.19638 69.1188L2.06395 71.6064L22.2909 97.0771L25.4233 94.5895ZM5.19639 69.1188C4.04815 67.6729 4.1666 65.5957 5.47273 64.2883L2.64299 61.4612C-0.0981545 64.2049 -0.348965 68.5679 2.06395 71.6064L5.19639 69.1188ZM5.47208 64.289C6.89178 62.8693 9.19226 62.8693 10.612 64.289L13.4404 61.4606C10.4586 58.4788 5.62545 58.4788 2.64365 61.4606L5.47208 64.289ZM10.612 64.289L18.5727 72.2498L21.4011 69.4213L13.4404 61.4606L10.612 64.289ZM18.5727 72.2498C22.3785 76.0556 28.8832 73.3592 28.8832 67.9791H24.8832C24.8832 69.7967 22.6864 70.7066 21.4011 69.4213L18.5727 72.2498ZM28.8832 67.9791V58.8897H24.8832V67.9791H28.8832ZM28.8832 58.8897V26.8582H24.8832V58.8897H28.8832ZM28.8832 26.8582C28.8832 24.8406 30.5182 23.2056 32.5358 23.2056V19.2056C28.3091 19.2056 24.8832 22.6315 24.8832 26.8582H28.8832ZM32.5358 23.2056C34.5533 23.2056 36.1884 24.8406 36.1884 26.8582H40.1884C40.1884 22.6315 36.7625 19.2056 32.5358 19.2056V23.2056ZM36.1884 26.8582V53.2371H40.1884V26.8582H36.1884Z" fill="white" fill-opacity="0.3" mask="url(#path-3-outside-1_6705_12705)"/>
-        </svg>
+      <div class="relative z-20">
+        <canvas
+            class="mx-auto mb-5 relative z-10"
+            ref="canvas"
+            @mousedown="startDrawing"
+            @mouseup="stopDrawing"
+            @mousemove="draw"
+            @touchstart="startDrawing"
+            @touchend="stopDrawing"
+            @touchmove="draw"
+            :width="canvasWidth"
+            :height="canvasHeight"
+        ></canvas>
+        <img ref="imgToCanvas" class="absolute top-0 left-0 -z-10" :src="imageSrc" alt="">
+        <EditHand :visible="visibleHand"/>
       </div>
-      <div class="flex items-start justify-between flex-wrap">
-        <div :class="{'opacity-0': checkPhoto}" class="w-[calc(18%-0.375rem)] h-16 relative">
-          <UButton @click.prevent="checkPhoto = !checkPhoto" :ui="{variant: {solid: 'ring-0 dark:bg-white/40 dark:text-zinc-700 p-0 w-fit rounded-md'}}" class="absolute top-1 right-1 z-10"  icon="i-material-symbols-arrow-outward"></UButton>
-          <img class="object-cover h-full rounded-lg transition-all duration-700" :class="{'scale-[6] translate-x-[130px] -translate-y-[130px] opacity-0': checkPhoto}"  :src="store.cart" alt="image">
+      <div class="flex items-start justify-between flex-wrap z-10 mb-5 relative">
+        <div class="w-[calc(18%-0.375rem)] h-16 relative">
+          <UButton @click.prevent="isOpenCloth = true" :ui="{variant: {solid: 'ring-0 dark:bg-white/40 dark:text-zinc-700 p-0 w-fit rounded-md'}}" class="absolute top-1 right-1 z-10"  icon="i-material-symbols-arrow-outward"></UButton>
+          <img class="object-cover dark:bg-white h-full w-full rounded-lg transition-all duration-700" :src="store.cart ? store.cart : ''" alt="image">
         </div>
-        <UButton v-for="(item, i) in tabs"
-                 variant="outline"
-                 @click="activeTab = i"
-                 class="transition-all duration-200"
-                 :class="{activeTab: activeTab === i}"
-                 :ui="{variant: {outline: `ring-2 ${activeTab === i ? 'dark:bg-transparent' : 'dark:bg-zinc-800'} w-[calc(21%-0.375rem)] h-16 flex items-center justify-center dark:text-zinc-800`},
-                      icon: {base: `${item.color} ${activeTab === i ? 'dark:text-white' : 'dark:text-white/50'}`},}"
-                 :icon="`${!item.custom ? item.icon : ''}`">
-          <template v-if="item.custom" #trailing>
-            <div class="w-6 h-6 border rounded-full bg-pink-500"></div>
-          </template>
-        </UButton>
+        <EditButtons v-for="(tab, i) in tabs" :tab="tab" v-model="activeTab" :key="i"/>
+        <EditModal :visible="activeTab" @update-settings="updateSettingsForPencil" @delete-mask-from-canvas="deleteMask"/>
       </div>
+<!--      <div>-->
+<!--        <UButton v-for="btn in colors" :class="`${btn.color}`"></UButton>-->
+<!--      </div>-->
+      <div>
+
+<!--        <div class="relative z-20">-->
+<!--          <button @click="setTool('pencil')">Карандаш</button>-->
+<!--          <button @click="setTool('eraser')">Ластик</button>-->
+<!--        </div>-->
+      </div>
+      <UButton :disabled="!photo" to="/edit" :class="{'dark:bg-zinc-800': !photo, 'dark:text-zinc-500': !photo, 'bg-neutral-200': !photo, 'text-zinc-400': !photo}" class="ms-auto transition-all duration-700" :ui="{variant: {solid: 'dark:bg-blue-500 dark:text-white font-normal'},gap: { xl: 'gap-x-2'}}">
+        <template #trailing>
+          Генерировать
+          <UIcon name="i-iconoir-spark-solid" class="w-5 h-5 rotate-90" />
+          2
+        </template>
+      </UButton>
     </UContainer>
+    <UModal :ui="{container: 'items-center', background: 'dark:bg-white'}" v-model="isOpenCloth">
+      <UButton @click.prevent="isOpenCloth = false" :ui="{variant: {solid: 'ring-0 dark:bg-gray-900/10 dark:text-zinc-700 p-0 w-fit rounded-md'}}" class="absolute top-3 rotate-180 right-3 z-10"  icon="i-material-symbols-arrow-outward"></UButton>
+      <img class="rounded-xl" :src="store.cart ? store.cart : ''" alt="image">
+    </UModal>
   </section>
 </main>
 </template>
 
 <style scoped>
-
+canvas {
+  touch-action: none; /* Отключаем стандартные действия для сенсорных экранов */
+}
 </style>
