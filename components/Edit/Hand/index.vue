@@ -4,7 +4,7 @@ defineProps<{visible: boolean}>()
 
 <template>
   <div :class="{'opacity-100': visible}" class="opacity-0 absolute left-1/2 -translate-x-1/2 top-1/3 transition-opacity duration-300 flex flex-col gap-5 items-center">
-    <div class="p-3 rounded-lg w-56 text-center dark:bg-black/55">Закрасьте область на фото, на которой должен появиться новый наряд</div>
+    <div class="p-3 rounded-lg w-56 text-white  text-center bg-black/55 dark:bg-black/55">Закрасьте область на фото, на которой должен появиться новый наряд</div>
     <svg width="75" height="107" viewBox="0 0 75 107" fill="none" xmlns="http://www.w3.org/2000/svg">
       <circle cx="32" cy="21.2056" r="20" stroke="black"/>
       <circle cx="32" cy="21.2056" r="20" fill="#FF00B2" stroke="white" stroke-dasharray="1 2"/>

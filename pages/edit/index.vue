@@ -44,23 +44,29 @@ const isDrawing = ref(false);
 const tool = ref('pencil');
 const imgToCanvas = ref(null);
 const photo = ref('');
-const canvasWidth = ref(300); // Ширина канваса
-const canvasHeight = ref(500); // Высота канваса
+const canvasWidth = ref(100 ); // Ширина канваса
+const canvasHeight = ref(400); // Высота канваса
+const sizeEraser = ref(10); // Высота канваса
 
-
+const sizePencil = ref(10)
 
 const color = ref<string>('rgba(236, 72, 153, 1)')
 
 const imageSrc = ref(store.cartBottom);
 onMounted(() => {
-  // canvasWidth.value = imgToCanvas.value.width
-  // canvasHeight.value = imgToCanvas.value.height
+  canvasWidth.value = imgToCanvas.value.width
+  canvasHeight.value = imgToCanvas.value.height
   ctx.value = canvas.value.getContext('2d');
-  ctx.value.lineWidth = 25;
+  ctx.value.lineWidth = sizePencil.value
   ctx.value.lineCap = 'round';
+  ctx.value.lineJoin = 'round'
+
 });
 
 const startDrawing = (event) => {
+  ctx.value.lineJoin = 'round'
+  ctx.value.lineCap = 'round';
+  ctx.value.lineWidth = sizePencil.value;
   visibleHand.value = false;
   isDrawing.value = true;
   ctx.value.beginPath();
@@ -69,6 +75,8 @@ const startDrawing = (event) => {
 };
 
 const stopDrawing = () => {
+  ctx.value.lineCap = 'round';
+  ctx.value.lineJoin = 'round'
   isDrawing.value = false;
   ctx.value.closePath();
   photo.value = canvas.value.toDataURL();
@@ -78,14 +86,16 @@ const draw = (event) => {
   if (!isDrawing.value) return;
   const { offsetX, offsetY } = getMousePosition(event);
   if (tool.value === 'pencil') {
+    ctx.value.lineJoin = 'round'
+    ctx.value.lineCap = 'round';
+    ctx.value.lineWidth = sizePencil.value;
     ctx.value.lineTo(offsetX, offsetY);
     ctx.value.strokeStyle = color.value;
     ctx.value.stroke();
   } else if (tool.value === 'eraser') {
-    ctx.value.clearRect(offsetX - 10, offsetY - 10, 20, 20); // Стираем область
+    ctx.value.clearRect(offsetX - 10, offsetY - 10, sizeEraser.value, sizeEraser.value); // Стираем область
   }
 };
-
 const getMousePosition = (event) => {
   const rect = canvas.value.getBoundingClientRect();
   const x = event.touches ? event.touches[0].clientX - rect.left : event.clientX - rect.left;
@@ -99,30 +109,23 @@ const setTool = (selectedTool) => {
 
 const updateSettingsForPencil = (weight:number, size:number, opacity:number) => {
   setTool('pencil')
-  ctx.value.lineWidth = size * 5;
+  sizePencil.value = size * 5;
   color.value = `rgba(236, 72, 153, ${opacity / 10})`;
-
+}
+const updateSettingsForEraser = (size:number) => {
+  sizeEraser.value = size * 10
 }
 
 const deleteMask = () => {
   ctx.value.clearRect(0, 0, canvasWidth.value, canvasHeight.value);
   activeTab.value = 5;
   photo.value = '';
+
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+const openAgainModal = (id:number) => {
+  activeTab.value = 5
+  setTimeout(() => {activeTab.value = id},1)
+}
 
 
 watch(()=> activeTab.value, () => {
@@ -152,7 +155,7 @@ watch(()=> activeTab.value, () => {
             :width="canvasWidth"
             :height="canvasHeight"
         ></canvas>
-        <img ref="imgToCanvas" class="absolute top-0 left-0 -z-10" :src="imageSrc" alt="">
+        <img ref="imgToCanvas" class="absolute top-0 left-0 w-full h-full object-contain -z-10" :src="imageSrc" alt="">
         <EditHand :visible="visibleHand"/>
       </div>
       <div class="flex items-start justify-between flex-wrap z-10 mb-5 relative">
@@ -160,8 +163,8 @@ watch(()=> activeTab.value, () => {
           <UButton @click.prevent="isOpenCloth = true" :ui="{variant: {solid: 'ring-0 dark:bg-white/40 dark:text-zinc-700 p-0 w-fit rounded-md'}}" class="absolute top-1 right-1 z-10"  icon="i-material-symbols-arrow-outward"></UButton>
           <img class="object-cover dark:bg-white h-full w-full rounded-lg transition-all duration-700" :src="store.cart ? store.cart : ''" alt="image">
         </div>
-        <EditButtons v-for="(tab, i) in tabs" :tab="tab" v-model="activeTab" :key="i"/>
-        <EditModal :visible="activeTab" @update-settings="updateSettingsForPencil" @delete-mask-from-canvas="deleteMask"/>
+        <EditButtons v-for="(tab, i) in tabs" :tab="tab" v-model="activeTab" :key="i" @open-again="openAgainModal" />
+        <EditModal :visible="activeTab" @update-settings="updateSettingsForPencil" @delete-mask-from-canvas="deleteMask" @close-delete-modal="activeTab = 5" @update-settings-eraser="updateSettingsForEraser"/>
       </div>
 <!--      <div>-->
 <!--        <UButton v-for="btn in colors" :class="`${btn.color}`"></UButton>-->

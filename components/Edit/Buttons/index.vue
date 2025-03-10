@@ -1,6 +1,6 @@
 <script setup lang="ts">
-const emit = defineEmits(['update:modelValue'])
-defineProps<{
+const emit = defineEmits(['update:modelValue', 'openAgain'])
+const props = defineProps<{
   tab: {
     id: number;
     icon: string;
@@ -10,12 +10,20 @@ defineProps<{
   modelValue: number
 }>()
 
+const OpenCurrentTab = ():void => {
+  if (props.tab.id === props.modelValue) {
+    emit('openAgain', props.tab.id)
+  } else {
+    emit('update:modelValue', props.tab.id)
+  }
+}
+
 </script>
 
 <template>
   <UButton
            variant="outline"
-           @click="emit('update:modelValue', tab.id)"
+           @click="OpenCurrentTab"
            class="transition-all duration-200"
            :class="{activeTab: modelValue === tab.id}"
            :ui="{variant: {outline: `ring-2 ${modelValue === tab.id ? 'dark:bg-transparent' : 'dark:bg-zinc-800'} w-[calc(21%-0.375rem)] h-16 flex items-center justify-center dark:text-zinc-800`},

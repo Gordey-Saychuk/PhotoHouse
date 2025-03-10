@@ -3,12 +3,13 @@ export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
   devtools: { enabled: true },
   app: {
+    head: {
+      viewport: 'width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=0',
+    },
     pageTransition: { name: 'page', mode: 'out-in' }
   },
   modules: [
     '@nuxt/ui',
-    '@nuxtjs/sitemap',
-    '@nuxtjs/robots',
     'nuxt-swiper',
     '@pinia/nuxt',
   ],
@@ -23,11 +24,6 @@ export default defineNuxtConfig({
           silenceDeprecations: ["import"]
         }
       }
-    }
-  },
-  runtimeConfig: {
-    public: {
-      TOKEN: process.env.TOKEN,
     }
   },
 })

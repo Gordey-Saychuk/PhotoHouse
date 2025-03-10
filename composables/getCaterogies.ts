@@ -7,7 +7,7 @@ export const useCategories = () => {
             chatId: '313226091'
         },
         headers: {
-            "Authorization": `Bearer ${runtimeConfig.public.TOKEN}`
+            "Authorization": `Bearer f113066f-2ad6-43eb-b860-8683fde1042a`
         }
     }).then((response: any) => response.data)
 
