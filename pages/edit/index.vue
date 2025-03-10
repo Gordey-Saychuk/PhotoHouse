@@ -38,34 +38,36 @@ const colors = ref([
 
 const isOpenCloth = ref<boolean>(false)
 const visibleHand = ref<boolean>(true)
-const canvas = ref(null);
+const canvas = ref<HTMLCanvasElement | null>(null);
 const ctx = ref(null);
 const isDrawing = ref(false);
 const tool = ref('pencil');
-const imgToCanvas = ref(null);
-const photo = ref('');
-const canvasWidth = ref(100 ); // Ширина канваса
+const imgToCanvas = ref<HTMLImageElement | null>(null);
+const photo = ref<string | undefined>('');
+const canvasWidth = ref<number | undefined>(100 ); // Ширина канваса
 const canvasHeight = ref(400); // Высота канваса
 const sizeEraser = ref(10); // Высота канваса
-
+const softness = ref(2);
 const sizePencil = ref(10)
 
 const color = ref<string>('rgba(236, 72, 153, 1)')
-
 const imageSrc = ref(store.cartBottom);
+
 onMounted(() => {
   canvasWidth.value = imgToCanvas.value.width
   canvasHeight.value = imgToCanvas.value.height
   ctx.value = canvas.value.getContext('2d');
-  ctx.value.lineWidth = sizePencil.value
-  ctx.value.lineCap = 'round';
-  ctx.value.lineJoin = 'round'
+
+  ctx.value.shadowColor = `rgba(236, 72, 153, 1)`;
+  ctx.value.shadowBlur = softness.value;
 
 });
 
 const startDrawing = (event) => {
   ctx.value.lineJoin = 'round'
   ctx.value.lineCap = 'round';
+  ctx.value.shadowColor = `rgba(236, 72, 153, 1)`; // Цвет тени должен совпадать с цветом кисти
+  ctx.value.shadowBlur = softness.value;
   ctx.value.lineWidth = sizePencil.value;
   visibleHand.value = false;
   isDrawing.value = true;
@@ -77,6 +79,8 @@ const startDrawing = (event) => {
 const stopDrawing = () => {
   ctx.value.lineCap = 'round';
   ctx.value.lineJoin = 'round'
+  ctx.value.shadowColor = `rgba(236, 72, 153, 1)`; // Цвет тени должен совпадать с цветом кисти
+  ctx.value.shadowBlur = softness.value;
   isDrawing.value = false;
   ctx.value.closePath();
   photo.value = canvas.value.toDataURL();
@@ -84,49 +88,77 @@ const stopDrawing = () => {
 
 const draw = (event) => {
   if (!isDrawing.value) return;
+  const rect = canvas.value.getBoundingClientRect();
+  const x = event.clientX - rect.left;
+  const y = event.clientY - rect.top;
   const { offsetX, offsetY } = getMousePosition(event);
   if (tool.value === 'pencil') {
     ctx.value.lineJoin = 'round'
     ctx.value.lineCap = 'round';
+    ctx.value.shadowColor = `rgba(236, 72, 153, 1)`; // Цвет тени должен совпадать с цветом кисти
+    ctx.value.shadowBlur = softness.value;
     ctx.value.lineWidth = sizePencil.value;
     ctx.value.lineTo(offsetX, offsetY);
     ctx.value.strokeStyle = color.value;
     ctx.value.stroke();
   } else if (tool.value === 'eraser') {
-    ctx.value.clearRect(offsetX - 10, offsetY - 10, sizeEraser.value, sizeEraser.value); // Стираем область
+    erase(x, y);// Стираем область
   }
 };
+
+
+//Определяем позицию мышки на канвасе
 const getMousePosition = (event) => {
   const rect = canvas.value.getBoundingClientRect();
   const x = event.touches ? event.touches[0].clientX - rect.left : event.clientX - rect.left;
   const y = event.touches ? event.touches[0].clientY - rect.top : event.clientY - rect.top;
   return { offsetX: x, offsetY: y };
 };
+///
 
-const setTool = (selectedTool) => {
-  tool.value = selectedTool;
-};
-
-const updateSettingsForPencil = (weight:number, size:number, opacity:number) => {
+//Обновляем размеры карандаша
+const updateSettingsForPencil = (weight:number, size:number, opacity:number):void => {
   setTool('pencil')
+  softness.value = weight;
   sizePencil.value = size * 5;
   color.value = `rgba(236, 72, 153, ${opacity / 10})`;
 }
-const updateSettingsForEraser = (size:number) => {
-  sizeEraser.value = size * 10
-}
+///
 
-const deleteMask = () => {
+
+const erase = (x, y) => {
+  ctx.value.save();
+  ctx.value.globalCompositeOperation = 'destination-out'; // Устанавливаем режим стирания
+  ctx.value.beginPath();
+  ctx.value.arc(x, y, 10, 0, Math.PI * 2, false); // Рисуем круг для ластика
+  ctx.value.fill();
+  ctx.value.restore();
+};
+
+
+//Меняем инструмент(карандаш/ластик)
+const setTool = (selectedTool:string):string => tool.value = selectedTool;
+///
+
+//Обновляем размеры ластика
+const updateSettingsForEraser = (size:number):number => sizeEraser.value = size * 10
+///
+
+//Удаляем маску полностью
+const deleteMask = ():void => {
   ctx.value.clearRect(0, 0, canvasWidth.value, canvasHeight.value);
   activeTab.value = 5;
   photo.value = '';
 
 }
-const openAgainModal = (id:number) => {
+///
+
+//повторное открывание модалки
+const openAgainModal = (id:number):void => {
   activeTab.value = 5
   setTimeout(() => {activeTab.value = id},1)
 }
-
+///
 
 watch(()=> activeTab.value, () => {
   activeTab.value === 3 ? isOpen.value = true : false
@@ -155,7 +187,7 @@ watch(()=> activeTab.value, () => {
             :width="canvasWidth"
             :height="canvasHeight"
         ></canvas>
-        <img ref="imgToCanvas" class="absolute top-0 left-0 w-full h-full object-contain -z-10" :src="imageSrc" alt="">
+        <img ref="imgToCanvas" class="absolute top-0 left-0 w-full h-full object-contain -z-10" :src="imageSrc ? imageSrc : ''" alt="">
         <EditHand :visible="visibleHand"/>
       </div>
       <div class="flex items-start justify-between flex-wrap z-10 mb-5 relative">
@@ -189,6 +221,8 @@ watch(()=> activeTab.value, () => {
       <img class="rounded-xl" :src="store.cart ? store.cart : ''" alt="image">
     </UModal>
   </section>
+  <img :src="photo" alt="">
+  <Canvas/>
 </main>
 </template>
 

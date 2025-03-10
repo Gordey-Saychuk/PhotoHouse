@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const valueWeight = ref(0)
+const valueWeight = ref(3)
 const valueSize = ref(3)
 const valueSizeEraser = ref(2)
 const valueOpacity = ref(10)
@@ -50,8 +50,8 @@ watch(()=> props.visible, (val) => {
           class="min-w-[7px] min-h-[7px] transition-all dark:text-pink-500 duration-300 mx-auto mb-5 border-spacing-4 border-dotted dark:border-white rounded-full bg-pink-500"></div>
       <p class="mb-2">Размер</p>
       <URange class="mb-3" v-model="valueSize" :min="1" :max="7"/>
-<!--      <p class="mb-2">Жёсткость</p>-->
-<!--      <URange class="mb-3" v-model="valueWeight" :min="0" :max="7"/>-->
+      <p class="mb-2">Жёсткость</p>
+      <URange class="mb-3" v-model="valueWeight" :min="2" :max="5"/>
       <p class="mb-2">Непрозрачность</p>
       <URange v-model="valueOpacity" :min="5" :max="10"/>
       <UButton class="mt-8" @click.prevent="saveSettings" >Применить</UButton>

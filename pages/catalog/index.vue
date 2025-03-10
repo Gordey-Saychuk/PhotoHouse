@@ -1,6 +1,11 @@
 <script setup lang="ts">
 import type {Category} from "~/types/category";
 import type {Slide} from "~/types/slide";
+// import {useWebApp, MainButton, useWebAppPopup, useWebAppTheme, BackButton} from "vue-tg";
+// const app = useWebApp()
+//
+// const { showAlert } = useWebAppPopup();
+// const { colorScheme} = useWebAppTheme()
 
 const {fetchCategories} = useCategories()
 const {data: userData} = await useAsyncData(() => fetchCategories())
