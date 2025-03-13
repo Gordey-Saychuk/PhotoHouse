@@ -1,18 +1,17 @@
 import {useLocalStorage} from "@vueuse/core";
-export const useCategories = () => {
+export const usePostClothing = () => {
     const tokenForStorage = useLocalStorage('tokenForStorage', '');
     const chatIdForStorage = useLocalStorage('chatIdForStorage', '');
-    const fetchCategories = () => $fetch(`https://bot.fotobudka.online/api/v1/fitting/templates`, {
-        params: {
-            chatId: chatIdForStorage.value
-        },
+    const postClothing = (body:object) => $fetch(`http://bot.fotobudka.online/api/fitting/${chatIdForStorage.value}/${tokenForStorage.value}`, {
+        method: 'POST',
         headers: {
             "Authorization": `Bearer ${tokenForStorage.value}`
-        }
+        },
+        body: body
     }).then((response: any) => response.data)
 
     return {
-        fetchCategories,
+        postClothing,
     }
 
 }

@@ -19,9 +19,11 @@ const favoritesIds = computed<number[]>(() => favorites.value.map((el:Slide) => 
 
 <template>
   <main>
-    <MainSlider :title="brand.title" :slides="brand.clothes" :favorites="favoritesIds" @update="refresh"/>
-    <MainSlider v-if="favorites.length" title="Избранное" :slides="favorites" :favorites="favoritesIds" @update="refresh" :small="true"/>
-    <MainSlider v-for="category in anyBrand"  :title="category.title" :slides="category.clothes" :favorites="favoritesIds" @update="refresh" :small="true"/>
+<!--    <pre>{{userData}}</pre>-->
+    <MainSlider :title="brand.title" :id="brand.id" :slides="brand.subCategories" :favorites="favoritesIds" @update="refresh"/>
+    <CategorySlider v-if="favorites.length" title="Избранное"  :slides="favorites" :favorites="favoritesIds" @update="refresh" :small="true"/>
+    <CategorySlider v-for="category in anyBrand" :id="category.id"  :title="category.title" :slides="category.clothes" :favorites="favoritesIds" @update="refresh" :small="true"/>
+<!--    <MainSlider v-for="category in anyBrand" :id="category.id"  :title="category.title" :slides="category.clothes" :favorites="favoritesIds" @update="refresh" :small="true"/>-->
   </main>
 </template>
 

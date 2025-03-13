@@ -1,14 +1,15 @@
+import {useLocalStorage} from "@vueuse/core";
 export const useAddFavorites = () => {
-    const runtimeConfig = useRuntimeConfig();
-
+    const tokenForStorage = useLocalStorage('tokenForStorage', '');
+    const chatIdForStorage = useLocalStorage('chatIdForStorage', '');
     const addFavorites = (id:number) => $fetch(`https://bot.fotobudka.online/api/v1/fitting/favourite`, {
         params: {
-            chatId: '313226091',
+            chatId: chatIdForStorage.value,
             id: id
         },
         method: 'POST',
         headers: {
-            "Authorization": `Bearer f113066f-2ad6-43eb-b860-8683fde1042a`
+            "Authorization": `Bearer ${tokenForStorage.value}`
         }
     }).then((response: any) => response.data)
 

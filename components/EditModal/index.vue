@@ -1,23 +1,29 @@
 <script setup lang="ts">
-const valueWeight = ref(3)
-const valueSize = ref(3)
-const valueSizeEraser = ref(2)
-const valueOpacity = ref(10)
-const isOpen= ref(false)
-const isOpenColor= ref(false)
-const isOpenDeleteModal= ref(false)
-const isOpenEraser= ref(false)
-const emit = defineEmits(['updateSettings', 'updateSettingsEraser', 'deleteMaskFromCanvas', 'closeDeleteModal'])
-const props = defineProps<{visible: number}>()
+const valueSoftness = ref<number>(5)
+const valueSize = ref<number>(3)
+const valueSizeEraser = ref<number>(2)
+const valueOpacity = ref<number>(30)
+const selectColor = ref<string>('')
+const isOpen= ref<boolean>(false)
+const isOpenColor= ref<boolean>(false)
+const isOpenDeleteModal= ref<boolean>(false)
+const isOpenEraser= ref<boolean>(false)
+const emit = defineEmits(['updateSettings', 'updateSettingsEraser', 'updateSettingsColor', 'deleteMaskFromCanvas', 'closeDeleteModal'])
+const props = defineProps<{color:string;visible: number}>()
 
 const saveSettings = ():void => {
-  emit('updateSettings', valueWeight.value, valueSize.value, valueOpacity.value)
+  emit('updateSettings', valueSoftness.value, valueSize.value, valueOpacity.value)
   isOpen.value = false
 }
 
 const saveSettingsEraser = ():void => {
   emit('updateSettingsEraser', valueSizeEraser.value)
   isOpenEraser.value = false
+}
+
+const saveSettingsForColor = ():void => {
+  emit('updateSettingsColor', selectColor.value)
+  isOpenColor.value = false
 }
 
 const deleteMask = ():void => {
@@ -29,7 +35,7 @@ const closeDelete = ():void => {
   isOpenDeleteModal.value = false
 }
 
-
+const getColor = (color:string):string => selectColor.value = color
 
 watch(()=> props.visible, (val) => {
   val === 1 ? isOpen.value = true : isOpen.value = false
@@ -45,15 +51,17 @@ watch(()=> props.visible, (val) => {
     <div class="p-4 flex flex-col gap-3">
       <div
           :style="`width: calc(7px * ${valueSize}); height: calc(7px * ${valueSize});
-                   opacity: ${valueOpacity / 10};
-                   box-shadow: 0 0 ${valueWeight}px ${valueWeight}px currentColor;`"
-          class="min-w-[7px] min-h-[7px] transition-all dark:text-pink-500 duration-300 mx-auto mb-5 border-spacing-4 border-dotted dark:border-white rounded-full bg-pink-500"></div>
+                   opacity: ${valueOpacity / 30};
+                   box-shadow: 0 0 ${valueSoftness / 10}px ${valueSoftness / 10}px currentColor;
+                   background-color: rgba(${color});
+                   color: rgba(${color})`"
+          class="min-w-[7px] min-h-[7px] transition-all duration-300 mx-auto mb-5 border-spacing-4 border-dotted dark:border-white rounded-full "></div>
       <p class="mb-2">Размер</p>
       <URange class="mb-3" v-model="valueSize" :min="1" :max="7"/>
-      <p class="mb-2">Жёсткость</p>
-      <URange class="mb-3" v-model="valueWeight" :min="2" :max="5"/>
-      <p class="mb-2">Непрозрачность</p>
-      <URange v-model="valueOpacity" :min="5" :max="10"/>
+      <p class="mb-2">Мягкость</p>
+      <URange class="mb-3" v-model="valueSoftness" :min="0" :max="20"/>
+      <p class="mb-2">Прозрачность</p>
+      <URange v-model="valueOpacity" :min="10" :max="30"/>
       <UButton class="mt-8" @click.prevent="saveSettings" >Применить</UButton>
     </div>
   </UModal>
@@ -76,16 +84,16 @@ watch(()=> props.visible, (val) => {
       <UButton class="mt-8" @click.prevent="saveSettingsEraser" >Применить</UButton>
     </div>
   </UModal>
-  <UModal :ui="{container: 'items-end', background: 'dark:bg-black/60 backdrop-blur-md', shadow: 'shadow-none'}" v-model="isOpenColor">
+  <UModal :ui="{container: 'items-center', background: 'dark:bg-black/60 backdrop-blur-md', shadow: 'shadow-none'}" v-model="isOpenColor">
     <UButton color="gray" variant="ghost" icon="i-heroicons-x-mark-20-solid" class="m-1 absolute right-0" @click="isOpenColor = false" />
     <div class="p-4 mt-8 flex  gap-3">
-      <div :class="{'border-2': true}" class="w-10 h-10 transition-all dark:text-white duration-300 mx-auto border-spacing-4 border dark:border-white rounded-full bg-pink-500"></div>
-      <div class="w-10 h-10 transition-all dark:text-white duration-300 mx-auto border-spacing-4 border dark:border-white rounded-full bg-green-500"></div>
-      <div class="w-10 h-10 transition-all dark:text-white duration-300 mx-auto border-spacing-4 border dark:border-white rounded-full bg-white"></div>
-      <div class="w-10 h-10 transition-all dark:text-white duration-300 mx-auto border-spacing-4 border dark:border-white rounded-full bg-black"></div>
+      <div @click="getColor('236, 72, 153')" :class="{'border-4': selectColor === '236, 72, 153'}" class="w-10 h-10 transition-all dark:text-white duration-300 mx-auto border-spacing-4 border dark:border-white rounded-full bg-pink-500"></div>
+      <div @click="getColor('34, 197, 94')" :class="{'border-4': selectColor === '34, 197, 94'}" class="w-10 h-10 transition-all dark:text-white duration-300 mx-auto border-spacing-4 border dark:border-white rounded-full bg-green-500"></div>
+      <div @click="getColor('255, 255, 255')" :class="{'border-4 dark:border-blue-500': selectColor === '255, 255, 255'}" class="w-10 h-10  transition-all dark:text-white duration-300 mx-auto border-spacing-4 border-2  rounded-full bg-white"></div>
+      <div @click="getColor('0, 0, 0')" :class="{'border-4': selectColor === '0, 0, 0'}" class="w-10 h-10 transition-all dark:text-white duration-300 mx-auto border-spacing-4 border dark:border-white rounded-full bg-black"></div>
     </div>
     <div class="p-4 pt-0">
-      <UButton class="mt-3" @click.prevent="saveSettingsEraser" >Применить</UButton>
+      <UButton class="mt-3" @click.prevent="saveSettingsForColor" >Применить</UButton>
     </div>
   </UModal>
 </template>

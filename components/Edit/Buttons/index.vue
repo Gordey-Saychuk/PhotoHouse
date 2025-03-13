@@ -7,7 +7,8 @@ const props = defineProps<{
     color: string;
     custom: boolean;
   }
-  modelValue: number
+  modelValue: number,
+  color: string
 }>()
 
 const OpenCurrentTab = ():void => {
@@ -30,7 +31,7 @@ const OpenCurrentTab = ():void => {
                       icon: {base: `${tab.color} ${modelValue === tab.id ? 'dark:text-white' : 'dark:text-white/50'}`},}"
            :icon="`${!tab.custom ? tab.icon : ''}`">
     <template v-if="tab.custom" #trailing>
-      <div class="w-6 h-6 border rounded-full bg-pink-500"></div>
+      <div :style="`background-color: rgba(${color})`" class="w-6 h-6 border rounded-full "></div>
     </template>
   </UButton>
 </template>

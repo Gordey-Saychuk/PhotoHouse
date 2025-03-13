@@ -1,12 +1,11 @@
 <script setup lang="ts">
 import {useCartStore} from "~/store/useCart";
 import type {Slide} from "~/types/slide";
-import type {Category} from "~/types/category";
 const router = useRouter()
 const store = useCartStore()
 const {addFavorites} = useAddFavorites()
 const emit = defineEmits(['update'])
-const props = defineProps<{id?:number,title: string;slides: Category[];favorites?: number[];small?: boolean}>()
+const props = defineProps<{categoryId:number;id?:number,title: string;slides: Slide[];favorites: number[];small?: boolean}>()
 
 const breakpoints = ref({1: {slidesPerView: props.small ? 4.15 : 3.15, spaceBetween: 8}})
 const containerRef = ref(null)
@@ -43,7 +42,7 @@ const inFavoriteBtn = computed<number | undefined>(() => {
   <section class="catalog pb-4">
     <UContainer>
       <div class="flex">
-        <RouterLink :to="`/category/${id}`">
+        <RouterLink :to="`/products/${props.categoryId}/${props.id}?category=${props.categoryId}`">
           <h2 :class="small ? 'text-xl mb-3 relative' : 'text-2xl mb-4 relative'">{{title}}
             <UIcon v-if="title === 'Избранное'" name="i-noto-red-heart" class="absolute -right-6 bottom-0.5 w-5 h-5" />
             <UIcon v-else name="i-material-symbols-chevron-right" class="absolute -right-6 bottom-0 w-6 h-6" />
@@ -66,10 +65,10 @@ const inFavoriteBtn = computed<number | undefined>(() => {
       <UModal :ui="{container: 'items-center', background: 'dark:bg-white'}" v-model="isOpenModal">
           <div class="pt-8 mb-4 relative">
             <img class="rounded-xl" :src="photo ? photo : ''" alt="image">
-<!--            <UButton :ui="{ padding: {square: 'p-1'}}" @click.prevent="addToFavorites" v-if="inFavoriteBtn !== undefined" class="p-1.5 absolute -bottom-4 left-0 dark:text-red-600"  variant="link" icon="i-material-symbols-light-favorite"></UButton>-->
-<!--            <UButton :ui="{ padding: {square: 'p-1'}}" @click.prevent="addToFavorites" v-else class="p-1.5 absolute -bottom-4 left-0 dark:text-red-600"  variant="link" icon="i-material-symbols-light-favorite-outline"></UButton>-->
+            <UButton :ui="{ padding: {square: 'p-1'}}" @click.prevent="addToFavorites" v-if="inFavoriteBtn !== undefined" class="p-1.5 absolute -bottom-4 left-0 dark:text-red-600"  variant="link" icon="i-material-symbols-light-favorite"></UButton>
+            <UButton :ui="{ padding: {square: 'p-1'}}" @click.prevent="addToFavorites" v-else class="p-1.5 absolute -bottom-4 left-0 dark:text-red-600"  variant="link" icon="i-material-symbols-light-favorite-outline"></UButton>
           </div>
-<!--        <UButton @click.prevent="loadPhotoToStore(photo)" :ui="{variant: {solid: 'dark:bg-blue-500 dark:text-white'}}">Выбрать</UButton>-->
+        <UButton @click.prevent="loadPhotoToStore(photo)" :ui="{variant: {solid: 'dark:bg-blue-500 dark:text-white'}}">Выбрать</UButton>
       </UModal>
     </UContainer>
   </section>
