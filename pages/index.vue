@@ -29,6 +29,7 @@ watchEffect(() => {
   <main>
     <section class="relative">
       <UContainer>
+
         <img v-if="!store.cart" class="w-full h-[55vh] object-cover rounded-xl mb-1.5" src="/assets/images/hero.webp" alt="hero">
         <div class="w-full h-[55vh] mb-1.5 dark:bg-zinc-800 rounded-xl" v-else>
           <img  class="w-full h-full object-contain mb-2" :src="store.cart" alt="hero">

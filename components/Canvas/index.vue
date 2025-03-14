@@ -69,7 +69,7 @@ const stopDrawing = () => {
   lastX.value = null;
   lastY.value = null;
   photo.value = canvas.value.toDataURL();
-  emit('stopDrawing')
+  emit('stopDrawing', photo.value)
 };
 
 const draw = (event, isStarting = false) => {

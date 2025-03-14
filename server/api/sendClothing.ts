@@ -1,25 +1,23 @@
 import {defineEventHandler} from 'h3';
 import {FormData} from "node-fetch-native";
-
 export default defineEventHandler(async (event) => {
     const formData = await readMultipartFormData(event);
     const newFormData = new FormData();
-    // formData.forEach(el => {
-    //     if (el.name === 'photo') {
-    //         newFormData.append(el.name, new Blob([el.data], { type: el.type || 'application/octet-stream' }), el.filename);
-    //     }
-    // });
-    // console.log(newFormData);
-    await $fetch('https://bot.fotobudka.online/api/fittingProcess/313226091/f113066f-2ad6-43eb-b860-8683fde1042a/7', {
+    const chatObject = formData.find((field) => field.name === 'chat');
+    const tokenObject = formData.find((field) => field.name === 'token');
+    const clothingObject = formData.find((field) => field.name === 'clothingId');
+    const chatId = chatObject.data.toString();
+    const token = tokenObject.data.toString();
+    const clothingId = clothingObject ? clothingObject.data.toString() : ''
+    formData.forEach(el => {
+           if (el.name === 'mask' || el.name === 'photo' || el.name === 'clothingImage') {
+               newFormData.append(el.name, new Blob([el.data], { type: el.type || 'application/octet-stream' }), el.filename);
+           }
+    });
+    return await $fetch(`https://bot.fotobudka.online/api/fittingProcess/${chatId}/${token}/${clothingId}`, {
         method: "POST",
-        params: newFormData
+        body: newFormData
     })
-        .then(response => {
-            console.log(response);
-            console.log('da')
-            return response;
-        })
-        .catch(error => {
-            console.log(error)
-        })
+        .then(response => response)
+        .catch(error => error)
 })

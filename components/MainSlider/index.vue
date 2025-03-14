@@ -57,7 +57,7 @@ const inFavoriteBtn = computed<number | undefined>(() => {
               :key="idx"
           >
             <button @click.prevent="openModal(slide.image, slide.id)" class="relative dark:bg-white bg-black/5 rounded-xl w-full">
-              <img :class="small ? 'min-h-32' : 'min-h-36'" class="object-contain rounded-xl" :src="slide.image" alt="slide.icon">
+              <img :class="small ? 'h-36' : 'h-40'" class="object-contain rounded-xl" :src="slide.image" alt="slide.icon">
               <span v-if="!small" class="absolute h-full w-full flex items-end justify-center font-semibold text-black bottom-0 left-1/2 -translate-x-1/2 rounded-xl catalog__bg">{{slide.title}}</span>
             </button>
           </swiper-slide>
