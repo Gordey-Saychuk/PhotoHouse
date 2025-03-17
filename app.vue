@@ -16,5 +16,6 @@ onMounted(() => {
     const { disableVerticalSwipes, expand } = useWebAppViewport();
     disableVerticalSwipes();
     expand();
+
 });
 </script>

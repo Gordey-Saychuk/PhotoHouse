@@ -56,7 +56,7 @@ const inFavoriteBtn = computed<number | undefined>(() => {
               v-for="(slide, idx) in slides"
               :key="idx"
           >
-            <button @click.prevent="openModal(slide.image, slide.id)" class="relative dark:bg-white bg-black/5 rounded-xl w-full">
+            <button class="relative dark:bg-white bg-black/5 rounded-xl w-full">
               <img :class="small ? 'h-36' : 'h-40'" class="object-contain rounded-xl" :src="slide.image" alt="slide.icon">
               <span v-if="!small" class="absolute h-full w-full flex items-end justify-center font-semibold text-black bottom-0 left-1/2 -translate-x-1/2 rounded-xl catalog__bg">{{slide.title}}</span>
             </button>
@@ -65,7 +65,7 @@ const inFavoriteBtn = computed<number | undefined>(() => {
       </ClientOnly>
       <UModal :ui="{container: 'items-center', background: 'dark:bg-white'}" v-model="isOpenModal">
           <div class="pt-8 mb-4 relative">
-            <img class="rounded-xl" :src="photo ? photo : ''" alt="image">
+            <img class="rounded-xl " :src="photo ? photo : ''" alt="image">
 <!--            <UButton :ui="{ padding: {square: 'p-1'}}" @click.prevent="addToFavorites" v-if="inFavoriteBtn !== undefined" class="p-1.5 absolute -bottom-4 left-0 dark:text-red-600"  variant="link" icon="i-material-symbols-light-favorite"></UButton>-->
 <!--            <UButton :ui="{ padding: {square: 'p-1'}}" @click.prevent="addToFavorites" v-else class="p-1.5 absolute -bottom-4 left-0 dark:text-red-600"  variant="link" icon="i-material-symbols-light-favorite-outline"></UButton>-->
           </div>

@@ -2,7 +2,8 @@
 import {useCartStore} from "~/store/useCart";
 import {useLocalStorage} from "@vueuse/core";
 import {dataUrlToFile} from "~/composables/dataUrlToFile";
-
+import { useWebApp } from 'vue-tg';
+const { close } = useWebApp();
 const store = useCartStore();
 const tabs = ref([
   {id: 1, icon: 'i-heroicons-paint-brush-16-solid', color: 'dark:text-white', custom: false},
@@ -53,12 +54,45 @@ const sendClothing = async () => {
     body: formData,
   })
   console.log(data.value)
-
-  setTimeout(() => { loading.value = false; generate.value = false}, 2000)
+  setTimeout(() => { loading.value = false; generate.value = false; close()}, 2000)
 }
 const startDrawing = ():boolean => visibleHand.value = false
-const stopDrawing = (image:string):boolean => {mask.value =  image; generate.value = true}
 
+
+const stopDrawing = (image: string, canvas): void => {
+  mask.value = image;
+  generate.value = true;
+  const ctx = canvas.getContext('2d');
+
+  // Получаем данные пикселей с канваса
+  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const data = imageData.data;
+
+  // Проходим по всем пикселям
+  for (let i = 0; i < data.length; i += 4) {
+    const alpha = data[i + 3]; // Альфа-канал (прозрачность)
+
+    // Если пиксель непрозрачный, меняем его на белый
+    if (alpha > 0) {
+      data[i] = 255;     // Красный
+      data[i + 1] = 255; // Зеленый
+      data[i + 2] = 255; // Синий
+    } else {
+      // Если пиксель прозрачный, меняем его на черный
+      data[i] = 0;       // Красный
+      data[i + 1] = 0;   // Зеленый
+      data[i + 2] = 0;   // Синий
+      data[i + 3] = 255;
+    }
+  }
+
+  // Обновляем канвас с новыми данными
+  ctx.putImageData(imageData, 0, 0);
+
+  // Логируем данные канваса
+  mask.value = canvas.toDataURL();
+  console.log(mask.value);
+};
 
 //Обновляем размеры карандаша
 const updateSettingsForPencil = (softness:number, size:number, opacity:number):void => {
@@ -92,25 +126,11 @@ const deleteMask = ():void => {
 ///
 
 
-//Удаляем маску полностью
-const sendCloth = async ():void => {
-  clearMask.value = !clearMask.value
-  activeTab.value = 5;
-  generate.value = false
-}
-///
-
 // //повторное открывание модалки
 const openAgainModal = (id:number):void => {
   activeTab.value = 5
   setTimeout(() => {activeTab.value = id},1)
 }
-
-
-
-
-
-
 
 
 
@@ -152,7 +172,7 @@ watch(()=> activeTab.value, () => {
         </template>
       </UButton>
     </UContainer>
-    <UModal :ui="{container: 'items-center', background: 'dark:bg-white'}" v-model="isOpenCloth">
+     <UModal :ui="{container: 'items-center', background: 'dark:bg-white'}" v-model="isOpenCloth">
       <UButton @click.prevent="isOpenCloth = false" :ui="{variant: {solid: 'ring-0 dark:bg-gray-900/10 dark:text-zinc-700 p-0 w-fit rounded-md'}}" class="absolute top-3 rotate-180 right-3 z-10"  icon="i-material-symbols-arrow-outward"></UButton>
       <img class="rounded-xl" :src="store.cart ? store.cart : ''" alt="image">
     </UModal>

@@ -1,6 +1,7 @@
 <template>
-  <div ref="container" class="relative h-[60vh] mb-5">
+  <div ref="container" class="relative max-h-[60vh] mb-5">
     <canvas
+        class="mx-auto"
         ref="canvas"
         @mousedown="startDrawing"
         @mouseup="stopDrawing"
@@ -11,14 +12,20 @@
         :width="canvasWidth"
         :height="canvasHeight"
     ></canvas>
-    <img ref="imgToCanvas" class="absolute top-0 left-0  object-contain -z-10 w-full h-full" :src="imageSrc ? imageSrc : ''" alt="">
+    <img
+        ref="imgToCanvas"
+        class="absolute top-0 left-0 object-contain -z-10 w-full h-full"
+        :src="imageSrc ? imageSrc : ''"
+        alt=""
+    />
   </div>
 </template>
 
 <script setup>
-import {useCartStore} from "~/store/useCart";
+import { ref, onMounted, watch } from 'vue';
+import { useCartStore } from '~/store/useCart';
 
-const emit = defineEmits(["startDrawing", "stopDrawing"]);
+const emit = defineEmits(['startDrawing', 'stopDrawing']);
 const props = defineProps({
   size: {
     type: Number,
@@ -40,8 +47,8 @@ const props = defineProps({
   },
   mainColor: {
     type: String,
-  }
-})
+  },
+});
 
 const canvas = ref(null);
 const ctx = ref(null);
@@ -53,10 +60,72 @@ const container = ref(null);
 const photo = ref('');
 
 const store = useCartStore();
-const imageSrc = ref(store.cartBottom);
+const canvasWidth = ref(300); // Начальная ширина канваса
+const canvasHeight = ref(400); // Начальная высота канваса
+
 const imgToCanvas = ref(null);
-const canvasWidth = ref(300); // Ширина канваса
-const canvasHeight = ref(400); // Высота канваса
+const imageSrc = ref(store.cartBottom);
+const imageSize = ref(null);
+
+// Функция для обновления размеров canvas
+const updateCanvasSize = () => {
+  if (container.value && imgToCanvas.value) {
+    const containerWidth = container.value.clientWidth;
+    const containerHeight = container.value.clientHeight;
+
+    const imageAspectRatio = imgToCanvas.value.naturalWidth / imgToCanvas.value.naturalHeight;
+    const containerAspectRatio = containerWidth / containerHeight;
+
+    if (containerAspectRatio > imageAspectRatio) {
+      // Контейнер шире, чем изображение
+      canvasHeight.value = containerHeight;
+      canvasWidth.value = containerHeight * imageAspectRatio;
+    } else {
+      // Контейнер уже, чем изображение
+      canvasWidth.value = containerWidth;
+      canvasHeight.value = containerWidth / imageAspectRatio;
+    }
+  }
+};
+
+// Обработчик загрузки изображения
+const onImageLoad = () => {
+  if (imgToCanvas.value) {
+    imageSize.value = {
+      width: imgToCanvas.value.naturalWidth,
+      height: imgToCanvas.value.naturalHeight,
+    };
+    console.log('Исходный размер изображения:', imageSize.value);
+    updateCanvasSize(); // Обновляем размеры canvas после загрузки изображения
+  }
+};
+
+// Функция для создания нового canvas с размерами 1:1
+const createScaledCanvas = () => {
+  if (!imageSize.value || !canvas.value) {
+    console.error('imageSize или canvas не определены');
+    return null;
+  }
+
+  const { width, height } = imageSize.value;
+
+  // Создаем новый canvas с размерами исходного изображения
+  const scaledCanvas = document.createElement('canvas');
+  scaledCanvas.width = width;
+  scaledCanvas.height = height;
+  const scaledCtx = scaledCanvas.getContext('2d');
+
+  if (!scaledCtx) {
+    console.error('Не удалось получить контекст для нового canvas');
+    return null;
+  }
+
+  // Переносим рисунок из текущего canvas на новый с масштабированием
+  scaledCtx.drawImage(canvas.value, 0, 0, width, height);
+
+  // Возвращаем новый canvas
+  return scaledCanvas;
+};
 
 const startDrawing = (event) => {
   drawing.value = true;
@@ -68,19 +137,34 @@ const stopDrawing = () => {
   drawing.value = false;
   lastX.value = null;
   lastY.value = null;
-  photo.value = canvas.value.toDataURL();
-  emit('stopDrawing', photo.value)
+
+  // Создаем новый canvas с размерами 1:1
+  const scaledCanvas = createScaledCanvas();
+  if (scaledCanvas) {
+    try {
+      photo.value = scaledCanvas.toDataURL(); // Сохраняем изображение с новым canvas
+      emit('stopDrawing', photo.value, scaledCanvas);
+    } catch (error) {
+      console.error('Ошибка при создании DataURL:', error);
+    }
+  } else {
+    console.error('Не удалось создать масштабированный canvas');
+  }
 };
 
 const draw = (event, isStarting = false) => {
-  if (!drawing.value) return;
+  if (!drawing.value || !canvas.value || !ctx.value) return;
 
   const rect = canvas.value.getBoundingClientRect();
   const x = event.touches ? event.touches[0].clientX - rect.left : event.clientX - rect.left;
   const y = event.touches ? event.touches[0].clientY - rect.top : event.clientY - rect.top;
 
   // Изменяем режим композитного рисования в зависимости от выбранного инструмента
-  ctx.value.globalCompositeOperation = tool.value === 'eraser' ? 'destination-out' : 'source-over';
+  if (tool.value === 'eraser') {
+    ctx.value.globalCompositeOperation = 'destination-out'; // Полностью стираем пиксели
+  } else {
+    ctx.value.globalCompositeOperation = 'source-over'; // Обычное рисование
+  }
 
   if (isStarting || lastX.value === null || lastY.value === null) {
     // Если это первый штрих, просто нарисуем точку
@@ -100,43 +184,49 @@ const draw = (event, isStarting = false) => {
 };
 
 const drawBrushStroke = (x, y) => {
-  const gradient = ctx.value.createRadialGradient(x, y, 0, x, y, props.size);
-  gradient.addColorStop(0, `rgba(${props.mainColor}, ${1.01 - props.opacity / 100})`);
-  gradient.addColorStop(1, `rgba(${props.mainColor}, ${1.01 - (props.opacity + props.softness) / 100})`);
+  if (!ctx.value) return;
 
-  ctx.value.fillStyle = gradient;
+  if (tool.value === 'eraser') {
+    // Для стирания используем прозрачный цвет
+    ctx.value.fillStyle = 'rgba(0, 0, 0, 1)'; // Прозрачность 100%
+  } else {
+    // Для рисования используем градиент
+    const gradient = ctx.value.createRadialGradient(x, y, 0, x, y, props.size);
+    gradient.addColorStop(0, `rgba(${props.mainColor}, ${1.01 - props.opacity / 100})`);
+    gradient.addColorStop(1, `rgba(${props.mainColor}, ${1.01 - (props.opacity + props.softness) / 100})`);
+    ctx.value.fillStyle = gradient;
+  }
+
   ctx.value.beginPath();
   ctx.value.arc(x, y, props.size, 0, Math.PI * 2);
   ctx.value.fill();
 };
 
 const deleteMask = () => {
-  ctx.value.clearRect(0, 0, canvasWidth.value, canvasHeight.value);
-}
+  if (ctx.value) {
+    ctx.value.clearRect(0, 0, canvasWidth.value, canvasHeight.value);
+  }
+};
 
 const setTool = (selectedTool) => {
   tool.value = selectedTool;
 };
 
 onMounted(() => {
-  // canvasWidth.value =  100
-  // canvasHeight.value =  100
-  ctx.value = canvas.value.getContext('2d');
-  ctx.value.lineCap = 'round';
-  ctx.value.lineJoin = 'round';
-  if (container.value) {
-    const rect = container.value.getBoundingClientRect();
-    canvasWidth.value = rect.width;
-    canvasHeight.value = rect.height;
+  if (canvas.value) {
+    ctx.value = canvas.value.getContext('2d');
+    ctx.value.lineCap = 'round';
+    ctx.value.lineJoin = 'round';
   }
+  onImageLoad()
 });
 
 onBeforeUnmount(() => {
   ctx.value = null;
 });
 
-watch(() => props.clear, () => deleteMask())
-watch(() => props.device, () => setTool(props.device, props.eraserSize))
+watch(() => props.clear, () => deleteMask());
+watch(() => props.device, () => setTool(props.device, props.eraserSize));
 </script>
 
 <style scoped>

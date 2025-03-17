@@ -68,7 +68,7 @@ const inFavoriteBtn = computed<number | undefined>(() => {
       </ClientOnly>
       <UModal :ui="{container: 'items-center', background: 'dark:bg-white'}" v-model="isOpenModal">
           <div class="pt-8 mb-4 relative">
-            <img class="rounded-xl" :src="photo ? photo : ''" alt="image">
+            <img class="rounded-xl max-h-[60vh] mx-auto" :src="photo ? photo : ''" alt="image">
             <UButton :ui="{ padding: {square: 'p-1'}}" @click.prevent="addToFavorites" v-if="inFavoriteBtn !== undefined" class="p-1.5 absolute -bottom-4 left-0 dark:text-red-600"  variant="link" icon="i-material-symbols-light-favorite"></UButton>
             <UButton :ui="{ padding: {square: 'p-1'}}" @click.prevent="addToFavorites" v-else class="p-1.5 absolute -bottom-4 left-0 dark:text-red-600"  variant="link" icon="i-material-symbols-light-favorite-outline"></UButton>
           </div>

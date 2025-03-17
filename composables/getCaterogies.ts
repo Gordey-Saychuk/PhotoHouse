@@ -4,10 +4,11 @@ export const useCategories = () => {
     const chatIdForStorage = useLocalStorage('chatIdForStorage', '');
     const fetchCategories = () => $fetch(`https://bot.fotobudka.online/api/v1/fitting/templates`, {
         params: {
-            chatId: chatIdForStorage.value
+            chatId: chatIdForStorage.value,
+            token: tokenForStorage.value,
         },
         headers: {
-            "Authorization": `Bearer ${tokenForStorage.value}`
+            "Authorization": `Bearer f113066f-2ad6-43eb-b860-8683fde1042a`
         }
     }).then((response: any) => response.data)
 
