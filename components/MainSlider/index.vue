@@ -40,7 +40,7 @@ const inFavoriteBtn = computed<number | undefined>(() => {
 </script>
 
 <template>
-  <section class="catalog pb-4">
+  <section class="catalog pb-4 pt-3">
     <UContainer>
       <div class="flex">
         <RouterLink :to="`/category/${id}`">

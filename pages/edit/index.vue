@@ -14,7 +14,7 @@ const tabs = ref([
 
 const tokenForStorage = useLocalStorage('tokenForStorage', '');
 const chatIdForStorage = useLocalStorage('chatIdForStorage', '');
-const sizePencil = ref<number>(15)
+const sizePencil = ref<number>(25)
 const sizeEraser = ref<number>(20)
 const opacityPencil = ref<number>(30)
 const softnessPencil = ref<number>(5)
@@ -57,7 +57,6 @@ const sendClothing = async () => {
   setTimeout(() => { loading.value = false; generate.value = false; close()}, 2000)
 }
 const startDrawing = ():boolean => visibleHand.value = false
-
 
 const stopDrawing = (image: string, canvas): void => {
   mask.value = image;
@@ -113,7 +112,10 @@ const updateSettingsForEraser = (size:number):number => {
 ///
 
 //Обновляем цвет
-const updateSettingsForColor = (color:string):string => mainColor.value = color
+const updateSettingsForColor = (color:string):string => {
+  device.value = 'pencil'
+  return  mainColor.value = color
+}
 ///
 
 
@@ -142,13 +144,12 @@ watch(()=> activeTab.value, () => {
 
 <template>
 <main>
-  <section>
+  <section class="pt-3 h-screen">
     <UContainer>
-      <div class="relative z-20">
+      <div class="relative z-20  h-[calc(100vh-190px)] dark:bg-zinc-800 rounded-xl mb-2 ">
       <Canvas @start-drawing="startDrawing" @stop-drawing="stopDrawing" :main-color="mainColor" :device="device" :eraser-size="sizeEraser" :size="sizePencil" :clear="clearMask" :opacity="100 - opacityPencil" :softness="softnessPencil" />
-      <EditHand :visible="visibleHand"/>
       </div>
-      <div class="flex items-start justify-between flex-wrap z-10 mb-5 relative">
+      <div class="flex items-start justify-between flex-wrap z-10 mb-6 relative">
         <div class="w-[calc(18%-0.375rem)] h-16 relative">
           <UButton @click.prevent="isOpenCloth = true" :ui="{variant: {solid: 'ring-0 dark:bg-white/40 dark:text-zinc-700 p-0 w-fit rounded-md'}}" class="absolute top-1 right-1 z-10"  icon="i-material-symbols-arrow-outward"></UButton>
           <img class="object-contain dark:bg-white h-full w-full rounded-lg transition-all duration-700" :src="store.cart ? store.cart : ''" alt="image">
@@ -172,10 +173,12 @@ watch(()=> activeTab.value, () => {
         </template>
       </UButton>
     </UContainer>
-     <UModal :ui="{container: 'items-center', background: 'dark:bg-white'}" v-model="isOpenCloth">
+     <UModal :ui="{overlay: {background: 'bg-gray-200/75 dark:bg-gray-800/35'}, container: 'items-end pb-28 w-[80%]', background: 'dark:bg-white'}" v-model="isOpenCloth">
       <UButton @click.prevent="isOpenCloth = false" :ui="{variant: {solid: 'ring-0 dark:bg-gray-900/10 dark:text-zinc-700 p-0 w-fit rounded-md'}}" class="absolute top-3 rotate-180 right-3 z-10"  icon="i-material-symbols-arrow-outward"></UButton>
-      <img class="rounded-xl" :src="store.cart ? store.cart : ''" alt="image">
+      <img class="rounded-xl h-[50vh]  object-contain" :src="store.cart ? store.cart : ''" alt="image">
     </UModal>
+    <EditHand :visible="visibleHand"/>
+
   </section>
 </main>
 </template>

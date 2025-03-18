@@ -16,11 +16,7 @@ export default defineNuxtConfig({
     },
     pageTransition: { name: 'page', mode: 'out-in' }
   },
-  modules: [
-    '@nuxt/ui',
-    'nuxt-swiper',
-    '@pinia/nuxt',
-  ],
+  modules: ['@nuxt/ui', 'nuxt-swiper', '@pinia/nuxt', '@nuxt/fonts'],
   colorMode: {
     preference: 'dark'
   },

@@ -10,6 +10,7 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "@nuxt/fonts": "^0.11.0",
     "@nuxt/ui": "^2.21.0",
     "@pinia/nuxt": "^0.5.1",
     "@vueuse/core": "^13.0.0",
@@ -17,6 +18,7 @@
     "nuxt-swiper": "^2.0.0",
     "pinia": "^2.1.7",
     "vue": "latest",
+    "vue-3-slider-component": "^1.0.2",
     "vue-router": "latest",
     "vue-tg": "^0.8.0"
   },

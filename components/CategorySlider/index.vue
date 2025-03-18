@@ -60,19 +60,19 @@ const inFavoriteBtn = computed<number | undefined>(() => {
               :key="idx"
           >
             <button @click.prevent="openModal(slide.image, slide.id)" class="relative dark:bg-white bg-black/5 rounded-xl w-full">
-              <img :class="small ? 'h-32' : 'h-36'" class="object-contain rounded-xl mx-auto" :src="slide.image" alt="slide.icon">
+              <img :class="small ? 'h-28' : 'h-36'" class="object-contain rounded-xl mx-auto" :src="slide.image" alt="slide.icon">
               <span v-if="!small" class="absolute h-full w-full flex items-end justify-center font-semibold text-black bottom-0 left-1/2 -translate-x-1/2 rounded-xl catalog__bg">{{slide.title}}</span>
             </button>
           </swiper-slide>
         </swiper-container>
       </ClientOnly>
-      <UModal :ui="{container: 'items-center', background: 'dark:bg-white'}" v-model="isOpenModal">
-          <div class="pt-8 mb-4 relative">
-            <img class="rounded-xl max-h-[60vh] mx-auto" :src="photo ? photo : ''" alt="image">
-            <UButton :ui="{ padding: {square: 'p-1'}}" @click.prevent="addToFavorites" v-if="inFavoriteBtn !== undefined" class="p-1.5 absolute -bottom-4 left-0 dark:text-red-600"  variant="link" icon="i-material-symbols-light-favorite"></UButton>
-            <UButton :ui="{ padding: {square: 'p-1'}}" @click.prevent="addToFavorites" v-else class="p-1.5 absolute -bottom-4 left-0 dark:text-red-600"  variant="link" icon="i-material-symbols-light-favorite-outline"></UButton>
+      <UModal :ui="{container: 'items-center', background: 'dark:bg-transparent'}" v-model="isOpenModal">
+          <div class="pt-8 mb-4 relative dark:bg-white rounded-xl">
+            <img class="rounded-xl h-[63vh] mx-auto object-contain" :src="photo ? photo : ''" alt="image">
+            <UButton :ui="{variant: {link: 'focus-visible:ring-0 dark:focus-visible:ring-0'}, padding: {square: 'p-1'}}" @click.prevent="addToFavorites" v-if="inFavoriteBtn !== undefined" class="p-1.5 absolute bottom-1 left-1 dark:text-red-600 focus-visible:ring-0 dark:focus-visible:ring-none "  variant="link" icon="i-solar-heart-bold"></UButton>
+            <UButton :ui="{variant: {link: 'focus-visible:ring-0 dark:focus-visible:ring-0'}, padding: {square: 'p-1'}}" @click.prevent="addToFavorites" v-else class="p-1.5 absolute bottom-1 left-1 dark:text-red-600 focus-visible:ring-0 dark:focus-visible:ring-none"  variant="link" icon="i-solar-heart-linear"></UButton>
           </div>
-        <UButton @click.prevent="loadPhotoToStore(photo, itemId)" :ui="{variant: {solid: 'dark:bg-blue-500 dark:text-white'}}">Выбрать</UButton>
+        <UButton @click.prevent="loadPhotoToStore(photo, itemId)" :ui="{variant: {solid: 'dark:bg-blue-500 dark:text-white font-medium'}}">Выбрать</UButton>
       </UModal>
     </UContainer>
   </section>

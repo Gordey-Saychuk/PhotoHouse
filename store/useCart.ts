@@ -7,7 +7,7 @@ export const useCartStore = defineStore('cart', () => {
     const tokenValue = ref<string | null>(null);
     const chatId = ref<number | null>(null);
     ///методы(actions)
-    const initCart = (file: string, id:number): string => {cart.value = file; id ? cartId.value = id : cartId.value = null}
+    const initCart = (file: string, id:number | null): void => {cart.value = file; id ? cartId.value = id : cartId.value = null}
     const initCartBottom = (file: string): string => cartBottom.value = file
     const initId = (id: number): number => chatId.value = id
     const initToken = (token: string): string => tokenValue.value = token

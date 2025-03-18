@@ -1,7 +1,7 @@
 <template>
-  <div ref="container" class="relative max-h-[60vh] mb-5">
+  <div ref="container" class="relative h-full w-full flex items-center justify-center">
     <canvas
-        class="mx-auto"
+        class=""
         ref="canvas"
         @mousedown="startDrawing"
         @mouseup="stopDrawing"
@@ -14,7 +14,7 @@
     ></canvas>
     <img
         ref="imgToCanvas"
-        class="absolute top-0 left-0 object-contain -z-10 w-full h-full"
+        class="absolute top-0  object-contain w-full h-full -z-10"
         :src="imageSrc ? imageSrc : ''"
         alt=""
     />
@@ -61,7 +61,7 @@ const photo = ref('');
 
 const store = useCartStore();
 const canvasWidth = ref(300); // Начальная ширина канваса
-const canvasHeight = ref(400); // Начальная высота канваса
+const canvasHeight = ref(500); // Начальная высота канваса
 
 const imgToCanvas = ref(null);
 const imageSrc = ref(store.cartBottom);
@@ -85,6 +85,9 @@ const updateCanvasSize = () => {
       canvasWidth.value = containerWidth;
       canvasHeight.value = containerWidth / imageAspectRatio;
     }
+
+    canvasWidth.value += 2;
+    canvasHeight.value += 2;
   }
 };
 
@@ -212,6 +215,32 @@ const setTool = (selectedTool) => {
   tool.value = selectedTool;
 };
 
+const changeCanvasColor = (newColor) => {
+  if (!canvas.value || !ctx.value) return;
+
+  // Получаем данные изображения
+  const imageData = ctx.value.getImageData(0, 0, canvasWidth.value, canvasHeight.value);
+  const data = imageData.data;
+
+  // Преобразуем новый цвет в RGB
+  const [r, g, b] = newColor.split(',').map(Number);
+
+  // Проходим по всем пикселям
+  for (let i = 0; i < data.length; i += 4) {
+    const alpha = data[i + 3]; // Альфа-канал (прозрачность)
+
+    // Если пиксель непрозрачный, меняем его цвет
+    if (alpha > 0) {
+      data[i] = r;     // Красный
+      data[i + 1] = g; // Зеленый
+      data[i + 2] = b; // Синий
+    }
+  }
+
+  // Обновляем canvas с новыми данными
+  ctx.value.putImageData(imageData, 0, 0);
+};
+
 onMounted(() => {
   if (canvas.value) {
     ctx.value = canvas.value.getContext('2d');
@@ -227,6 +256,9 @@ onBeforeUnmount(() => {
 
 watch(() => props.clear, () => deleteMask());
 watch(() => props.device, () => setTool(props.device, props.eraserSize));
+watch(() => props.mainColor, (newColor) => {
+  changeCanvasColor(newColor);
+});
 </script>
 
 <style scoped>
