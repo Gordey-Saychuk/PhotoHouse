@@ -53,7 +53,6 @@ const sendClothing = async () => {
     method: 'POST',
     body: formData,
   })
-  console.log(data.value)
   setTimeout(() => { loading.value = false; generate.value = false; close()}, 2000)
 }
 const startDrawing = ():boolean => visibleHand.value = false
@@ -90,7 +89,6 @@ const stopDrawing = (image: string, canvas): void => {
 
   // Логируем данные канваса
   mask.value = canvas.toDataURL();
-  console.log(mask.value);
 };
 
 //Обновляем размеры карандаша
@@ -146,7 +144,8 @@ watch(()=> activeTab.value, () => {
 <main>
   <section class="pt-3 h-screen">
     <UContainer>
-      <div class="relative z-20  h-[calc(100vh-190px)] dark:bg-zinc-800 rounded-xl mb-2 ">
+      <div class="relative z-20  h-[calc(100vh-175px)] dark:bg-zinc-800 rounded-xl mb-2 ">
+        <UButton to="/help" class="absolute top-5 right-5 w-10 h-10 z-10 rounded-full" icon="ion:help" :ui="{variant: {solid: 'dark:bg-black/50 dark:text-white font-normal'},gap: { xl: 'gap-x-2'}}"/>
       <Canvas @start-drawing="startDrawing" @stop-drawing="stopDrawing" :main-color="mainColor" :device="device" :eraser-size="sizeEraser" :size="sizePencil" :clear="clearMask" :opacity="100 - opacityPencil" :softness="softnessPencil" />
       </div>
       <div class="flex items-start justify-between flex-wrap z-10 mb-6 relative">

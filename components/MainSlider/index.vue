@@ -34,6 +34,10 @@ const addToFavorites = async () => {
   inFavorite.value = !inFavorite.value
 }
 
+const goto = (id) => {
+  router.push(`/products/1/${id}?category=1`)
+}
+
 const inFavoriteBtn = computed<number | undefined>(() => {
   return props.favorites.find((el:number) => el === itemId.value)
 });
@@ -56,7 +60,7 @@ const inFavoriteBtn = computed<number | undefined>(() => {
               v-for="(slide, idx) in slides"
               :key="idx"
           >
-            <button class="relative dark:bg-white bg-black/5 rounded-xl w-full">
+            <button @click.prevent="goto(slide.id)" class="relative dark:bg-white bg-black/5 rounded-xl w-full">
               <img :class="small ? 'h-36' : 'h-40'" class="object-contain rounded-xl" :src="slide.image" alt="slide.icon">
               <span v-if="!small" class="absolute h-full w-full flex items-end justify-center font-semibold text-black bottom-0 left-1/2 -translate-x-1/2 rounded-xl catalog__bg">{{slide.title}}</span>
             </button>

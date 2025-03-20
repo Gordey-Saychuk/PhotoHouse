@@ -1,8 +1,29 @@
 <script setup lang="ts">
 import {useCartStore} from "~/store/useCart";
 const ready = ref(true)
+const heicImage = ref(false)
+const heicImageUrl = ref('')
+const heicImageObject = ref(null)
 const store = useCartStore()
 const toast = useToast()
+const loadImage = ref(false)
+
+const handleImageLoad = (e) => {
+  loadImage.value = false
+}
+
+const convertImage = async (file) => {
+  loadImage.value = true
+  const formData = new FormData()
+  formData.append('image', file)
+  const {data} = await useFetch('/api/sendImage', {
+    method: 'POST',
+    body: formData,
+  })
+  heicImageUrl.value = data.value.url
+  heicImage.value = true
+  store.initCart(data.value.url, null);
+}
 
 const handleFileUpload = async (e) => {
   const target = e.target;
@@ -12,11 +33,16 @@ const handleFileUpload = async (e) => {
   }
 
   const file = target.files[0];
+  const fileName = file.name.toLowerCase();
+  const isHEIC = fileName.endsWith('.heic') || fileName.endsWith('.heif');
+  if  (isHEIC) {
+    convertImage(target.files[0])
+  }
 
   // Проверяем MIME-тип файла
-  const supportedFormats = ['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml'];
-  if (!supportedFormats.includes(file.type)) {
-    toast.add({ title: 'Неподдерживаемый формат файла. Пожалуйста, загрузите изображение в формате JPEG, PNG, WebP или SVG.' })
+  const supportedFormats = ['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml', 'image/heic'];
+  if (!supportedFormats.includes(file.type) && !isHEIC) {
+    toast.add({ title: 'Неподдерживаемый формат файла. Пожалуйста, загрузите изображение в формате JPEG, PNG, HEIC, WebP или SVG.' })
     return;
   }
 
@@ -45,9 +71,14 @@ watchEffect(() => {
     <section class="relative h-screen pt-3">
       <UContainer class="flex-1">
         <UNotifications />
-        <img v-if="!store.cart" class="w-full h-[calc(100vh-240px)] object-cover rounded-xl mb-1.5" src="/assets/images/hero.webp" alt="hero">
-        <div class="w-full h-[calc(100vh-250px)]  mb-1.5 dark:bg-zinc-800 rounded-xl" v-else>
-          <img  class="w-full h-full object-contain mb-2 rounded-xl" :src="store.cart" alt="hero">
+        <img v-if="!store.cart" class="w-full h-[calc(100vh-230px)] object-cover rounded-xl mb-1.5" src="/assets/images/hero.jpg" alt="hero">
+        <div v-else class="w-full h-[calc(100vh-230px)]  mb-1.5 dark:bg-zinc-800 rounded-xl relative" >
+          <img v-if="!heicImage"  class="w-full h-full object-contain mb-2 rounded-xl" :src="store.cart" alt="hero">
+          <img v-else ref="heicImageObject" class="w-full h-full object-contain mb-2 rounded-xl" :src="heicImageUrl" alt="hero" @load="handleImageLoad">
+          <div  class="absolute w-full transition-all duration-500 h-full top-0 left-0 flex flex-col gap-3 items-center justify-center bg-black border border-blue-200/50 rounded-xl" :class="loadImage ?  'opacity-1' : 'opacity-0'">
+            <UIcon class="w-10 h-10 animate-spin" name="ant-design:loading-3-quarters-outlined"/>
+            <p>Обработка фото...</p>
+          </div>
         </div>
         <UButton to="/catalog" class="mb-1.5" >Выбрать в каталоге примеров</UButton>
         <p class="text-center mb-1.5">или</p>

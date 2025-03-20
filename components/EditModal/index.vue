@@ -79,7 +79,7 @@ watch(() => isOpenEraser.value, (val) => {
   </UModal>
   <UModal :ui="{overlay: {background: 'bg-gray-200/35 dark:bg-gray-800/25'}, container: 'items-center', background: 'dark:bg-black/65', shadow: 'shadow-none'}" v-model="isOpenDeleteModal">
     <div class="p-4">
-      <h5 class="font-semibold text-lg text-center">Вы уверены?</h5>
+      <h5 class="font-semibold text-lg text-center mb-2">Вы уверены?</h5>
       <p class="text-center mb-3 px-20">Если удалите маску, то придется рисовать заново</p>
       <UButton @click="deleteMask" class="dark:bg-red-500  bg-red-500  dark:text-white mb-2">Удалить</UButton>
       <UButton @click="closeDelete" :ui="{variant: {solid: 'dark:bg-blue-500 dark:text-white'}}">Отмена</UButton>
