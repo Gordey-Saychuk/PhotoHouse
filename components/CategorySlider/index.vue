@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import {useCartStore} from "~/store/useCart";
 import type {Slide} from "~/types/slide";
+import {useLocalStorage} from "@vueuse/core";
+const chatIdForStorage = useLocalStorage('chatIdForStorage', '');
 const router = useRouter()
 const store = useCartStore()
 const {addFavorites} = useAddFavorites()
@@ -12,7 +14,7 @@ const containerRef = ref(null)
 const photo = ref<string>('')
 const itemId = ref<number>(0)
 
-const {refresh} = await useAsyncData(() => addFavorites(itemId.value), {immediate: false})
+const {refresh} = await useAsyncData(() => addFavorites(itemId.value, Number(chatIdForStorage.value)), {immediate: false})
 
 
 const isOpenModal = ref<boolean>(false);

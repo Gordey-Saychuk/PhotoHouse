@@ -3,44 +3,19 @@ import {useCartStore} from "~/store/useCart";
 import type {Slide} from "~/types/slide";
 import type {Category} from "~/types/category";
 const router = useRouter()
-const store = useCartStore()
-const {addFavorites} = useAddFavorites()
 const emit = defineEmits(['update'])
 const props = defineProps<{id?:number,title: string;slides: Category[];favorites?: number[];small?: boolean}>()
 
 const breakpoints = ref({1: {slidesPerView: props.small ? 4.15 : 3.15, spaceBetween: 8}})
 const containerRef = ref(null)
 const photo = ref<string>('')
-const itemId = ref<number>(0)
-
-const {refresh} = await useAsyncData(() => addFavorites(itemId.value), {immediate: false})
-
 
 const isOpenModal = ref<boolean>(false);
-const inFavorite = ref<boolean>(false);
-const openModal = (image:string, id:number):void => {
-  itemId.value = id
-  photo.value = image
-  isOpenModal.value = true
-}
-const loadPhotoToStore = (photo:string):void => {
-  store.initCart(photo)
-  isOpenModal.value = false
-  setTimeout(() => router.push('/'), 400)
-}
-const addToFavorites = async () => {
-  emit('update')
-  await refresh()
-  inFavorite.value = !inFavorite.value
-}
 
 const goto = (id) => {
   router.push(`/products/1/${id}?category=1`)
 }
 
-const inFavoriteBtn = computed<number | undefined>(() => {
-  return props.favorites.find((el:number) => el === itemId.value)
-});
 </script>
 
 <template>
@@ -70,10 +45,7 @@ const inFavoriteBtn = computed<number | undefined>(() => {
       <UModal :ui="{container: 'items-center', background: 'dark:bg-white'}" v-model="isOpenModal">
           <div class="pt-8 mb-4 relative">
             <img class="rounded-xl " :src="photo ? photo : ''" alt="image">
-<!--            <UButton :ui="{ padding: {square: 'p-1'}}" @click.prevent="addToFavorites" v-if="inFavoriteBtn !== undefined" class="p-1.5 absolute -bottom-4 left-0 dark:text-red-600"  variant="link" icon="i-material-symbols-light-favorite"></UButton>-->
-<!--            <UButton :ui="{ padding: {square: 'p-1'}}" @click.prevent="addToFavorites" v-else class="p-1.5 absolute -bottom-4 left-0 dark:text-red-600"  variant="link" icon="i-material-symbols-light-favorite-outline"></UButton>-->
           </div>
-<!--        <UButton @click.prevent="loadPhotoToStore(photo)" :ui="{variant: {solid: 'dark:bg-blue-500 dark:text-white'}}">Выбрать</UButton>-->
       </UModal>
     </UContainer>
   </section>

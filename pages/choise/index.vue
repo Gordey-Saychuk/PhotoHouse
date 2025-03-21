@@ -85,7 +85,7 @@ watchEffect(() => {
         <div class="w-full h-[calc(55vh-50px)]  mb-1.5 overflow-hidden dark:bg-zinc-800 rounded-xl relative ">
           <label v-if="!store.cartBottom" class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
             <input @change="handleFileUpload" type="file" hidden>
-            Загрузите фотографию, на которой вы хотете примерить одежу
+            Загрузите фотографию, на которой вы хотите примерить одежду
           </label>
           <img style="filter: brightness(5); opacity: 0.05"  v-if="!store.cartBottom" class="w-full h-full rounded-xl object-contain mb-2 cursor-pointer" :src="store.cartBottom ? store.cartBottom : photo" alt="heroBottom">
           <img v-else class="w-full h-full object-contain cursor-pointer" :src="store.cartBottom ? store.cartBottom : photo" alt="heroBottom" @load="handleImageLoad">

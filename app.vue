@@ -8,8 +8,10 @@ import { useWebAppViewport } from 'vue-tg';
 const route = useRoute()
 const tokenForStorage = useLocalStorage('tokenForStorage', '');
 const chatIdForStorage = useLocalStorage('chatIdForStorage', '');
-tokenForStorage.value = route.query.token;
-chatIdForStorage.value = route.query.chatId;
+if (!tokenForStorage) {
+  tokenForStorage.value = route.query.token;
+  chatIdForStorage.value = route.query.chatId;
+}
 
 onMounted(() => {
     const { disableVerticalSwipes, expand } = useWebAppViewport();
