@@ -8,7 +8,7 @@ import { useWebAppViewport } from 'vue-tg';
 const route = useRoute()
 const tokenForStorage = useLocalStorage('tokenForStorage', '');
 const chatIdForStorage = useLocalStorage('chatIdForStorage', '');
-if (!tokenForStorage) {
+if (route.query.token) {
   tokenForStorage.value = route.query.token;
   chatIdForStorage.value = route.query.chatId;
 }
