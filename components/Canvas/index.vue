@@ -1,5 +1,5 @@
 <template>
-  <div ref="container" class="relative h-full w-full flex items-center justify-center">
+  <div ref="container" :class="{'pointer-events-none': loading}" class="relative h-full w-full flex items-center justify-center">
     <canvas
         class=""
         ref="canvas"
@@ -47,6 +47,9 @@ const props = defineProps({
   },
   mainColor: {
     type: String,
+  },
+  loading: {
+    type: Boolean,
   },
 });
 

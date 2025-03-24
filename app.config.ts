@@ -11,7 +11,7 @@ export default defineAppConfig({
                 color: 'blue',
             },
             variant: {
-                solid: 'dark:text-blue-500/80 dark:bg-blue-400/20 w-full justify-center rounded-lg',
+                solid: 'dark:text-blue-500/95 dark:bg-blue-400/20 w-full font-semibold justify-center rounded-lg',
             },
         },
         range: {

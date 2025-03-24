@@ -53,7 +53,7 @@ const sendClothing = async () => {
     method: 'POST',
     body: formData,
   })
-  setTimeout(() => { loading.value = false; generate.value = false; close()}, 2000)
+  setTimeout(() => { loading.value = false; generate.value = false; close()}, 200)
 }
 const startDrawing = ():boolean => visibleHand.value = false
 
@@ -146,7 +146,7 @@ watch(()=> activeTab.value, () => {
     <UContainer>
       <div class="relative z-20  h-[calc(100vh-175px)] dark:bg-zinc-800 rounded-xl mb-2 ">
         <UButton to="/help" class="absolute top-5 right-5 w-10 h-10 z-10 rounded-full" icon="ion:help" :ui="{variant: {solid: 'dark:bg-black/50 dark:text-white font-normal'},gap: { xl: 'gap-x-2'}}"/>
-      <Canvas @start-drawing="startDrawing" @stop-drawing="stopDrawing" :main-color="mainColor" :device="device" :eraser-size="sizeEraser" :size="sizePencil" :clear="clearMask" :opacity="100 - opacityPencil" :softness="softnessPencil" />
+      <Canvas @start-drawing="startDrawing" @stop-drawing="stopDrawing" :loading="loading" :main-color="mainColor" :device="device" :eraser-size="sizeEraser" :size="sizePencil" :clear="clearMask" :opacity="100 - opacityPencil" :softness="softnessPencil" />
       </div>
       <div class="flex items-start justify-between flex-wrap z-10 mb-6 relative">
         <div class="w-[calc(18%-0.375rem)] h-16 relative">
@@ -156,14 +156,14 @@ watch(()=> activeTab.value, () => {
         <EditButtons v-for="(tab, i) in tabs" :tab="tab" v-model="activeTab" :key="i"  @open-again="openAgainModal" :color="mainColor"/>
         <EditModal :color="mainColor" :visible="activeTab" @update-settings="updateSettingsForPencil" @delete-mask-from-canvas="deleteMask" @close-delete-modal="activeTab = 5" @update-settings-eraser="updateSettingsForEraser" @update-settings-color="updateSettingsForColor" />
       </div>
-      <UButton @click.prevent="sendClothing"  to="/edit" :class="{'dark:bg-zinc-800': !generate, 'dark:text-zinc-500': !generate, 'bg-neutral-200': !generate, 'text-zinc-400': !generate}" class="ms-auto transition-all duration-700 relative focus:outline-0" :ui="{variant: {solid: 'dark:bg-blue-500 dark:text-white font-normal'},gap: { xl: 'gap-x-2'}}">
+      <UButton @click.prevent="sendClothing"   to="/edit" :class="{'dark:bg-zinc-800': !generate, 'dark:text-zinc-500': !generate, 'bg-neutral-200': !generate, 'text-zinc-400': !generate, 'pointer-events-none': loading}" class="ms-auto transition-all duration-700 relative focus:outline-0" :ui="{variant: {solid: 'dark:bg-blue-500 dark:text-white font-normal disabled:pointer-events-none'},gap: { xl: 'gap-x-2'}}">
         <template #trailing>
           <div v-if="!loading" class="flex items-center gap-x-2">
             Генерировать
             <UIcon name="i-iconoir-spark-solid" class="w-5 h-5 rotate-90" />
             2
           </div>
-          <div v-else class="">
+          <div v-else>
             <svg aria-hidden="true" class="inline w-5 h-5 text-white animate-spin dark:text-white fill-blue-600 " viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/>
               <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill"/>
