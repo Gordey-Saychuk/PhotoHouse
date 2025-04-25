@@ -72,7 +72,7 @@ watchEffect(() => {
       <UContainer class="flex-1 relative">
         <UNotifications />
         <UButton to="https://t.me/fotobudka_ai/409" class="absolute top-3 left-5" :ui="{variant: {solid:'dark:text-white w-fit text-sm py-1 dark:bg-black/30 font-semibold rounded-full'}}">Видеоинструкция</UButton>
-        <img v-if="!store.cart" class="w-full h-[calc(100vh-230px)] object-cover rounded-xl mb-1.5" src="/assets/images/IMG_1688.gif" alt="hero">
+        <img v-if="!store.cart" class="w-full h-[calc(100vh-230px)] object-cover rounded-xl mb-1.5" src="/assets/images/IMG_1722.gif" alt="hero">
         <div v-else class="w-full h-[calc(100vh-230px)]  mb-1.5 dark:bg-zinc-800 rounded-xl relative" >
           <img v-if="!heicImage"  class="w-full h-full object-contain mb-2 rounded-xl" :src="store.cart" alt="hero">
           <img v-else ref="heicImageObject" class="w-full h-full object-contain mb-2 rounded-xl" :src="heicImageUrl" alt="hero" @load="handleImageLoad">
